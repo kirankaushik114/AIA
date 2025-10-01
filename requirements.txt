@@ -1,0 +1,15 @@
+robotframework==6.1.1
+robotframework-requests==0.9.3
+robotframework-seleniumlibrary==6.0.0
+robotframework-jsonlibrary==0.5
+# For parsing and emailing
+requests>=2.28.0
+lxml>=4.9.0
+
+
+# optional: use pytest for additional tooling
+pytest>=7.0.0
+
+
+# If using headless browser in CI (chromedriver) and selenium, you may need webdriver-manager
+webdriver-manager>=3.8.5
