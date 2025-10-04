@@ -1,10 +1,8 @@
----
 name: Robot Framework CI (hourly)
 
 on:
   schedule:
-    # Runs at minute 0 of every hour — adjust cron as needed (UTC timezone for GitHub Actions)
-    - cron: "0 * * * *"
+    - cron: "0 * * * *"   # every hour, UTC
   workflow_dispatch:
 
 jobs:
