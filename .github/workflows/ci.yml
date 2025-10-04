@@ -2,12 +2,14 @@ name: Robot Framework CI (hourly)
 
 on:
   schedule:
-    - cron: "0 * * * *"   # every hour, UTC
-  workflow_dispatch:      # allow manual trigger
+    # Runs at minute 0 of every hour — adjust cron as needed (UTC timezone for GitHub Actions)
+    - cron: '0 * * * *'
+  workflow_dispatch:
 
 jobs:
   run-tests:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -15,7 +17,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: "3.11"
+          python-version: '3.11'
 
       - name: Install dependencies
         run: |
@@ -26,7 +28,7 @@ jobs:
         run: |
           mkdir -p reports
           ./scripts/run_tests.sh
-        continue-on-error: true   # ensure reports are uploaded even if tests fail
+        continue-on-error: true
 
       - name: Upload Artifact (reports)
         uses: actions/upload-artifact@v4
@@ -48,15 +50,15 @@ jobs:
       - name: Fail job on test failures
         if: always()
         run: |
+          # Robot returns non-zero if tests failed; ensure workflow fails appropriately
+          # If run_tests.sh exited non-zero earlier, the step would have continued due to continue-on-error
+          # We inspect the return code by checking output.xml
           if [ -f reports/output.xml ]; then
-            if command -v xmllint >/dev/null 2>&1; then
-              FAILS=$(xmllint --xpath 'string(//statistics//total//failures)' reports/output.xml 2>/dev/null || echo "")
-            else
-              FAILS=$(grep -o '<failures>[^<]*' reports/output.xml | head -n1 | sed -E 's/<failures>([0-9]+).*/\1/' || echo "0")
-            fi
+            # parse with xmllint to find total failures
+            FAILS=$(xmllint --xpath 'string(//statistics//total//failures)' reports/output.xml 2>/dev/null || echo "")
+            # Fallback: If xmllint not present, grep
             if [ -z "$FAILS" ]; then
-              echo "Could not determine failure count; failing for safety."
-              exit 1
+              FAILS=$(grep -o '<failures>[^<]*' reports/output.xml | head -n1 | sed -E 's/<failures>([0-9]+).*/\1/' || echo "0")
             fi
             if [ "$FAILS" != "0" ]; then
               echo "Tests have failures: $FAILS"
