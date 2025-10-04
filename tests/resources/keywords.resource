@@ -1,0 +1,4 @@
+*** Keywords ***
+Log JSON Pretty
+    [Arguments]    ${json}
+    Log    ${json}
