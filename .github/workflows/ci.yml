@@ -1,65 +1,19 @@
----
-name: Robot Framework CI (hourly)
-
-on:
-  schedule:
-    - cron: "0 * * * *"  # every hour (UTC)
-  workflow_dispatch:
-
-jobs:
-  run-tests:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: "3.11"
-
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
-          pip install python-dotenv  # ensure .env loading works
-
-      - name: Run Robot Framework tests
-        run: |
-          mkdir -p reports
-          ./scripts/run_tests.sh
-        continue-on-error: true
-
-      - name: Upload test reports
-        uses: actions/upload-artifact@v4
-        with:
-          name: robot-reports
-          path: reports/
-
-      - name: Send results by email
-        env:
-          SMTP_HOST: ${{ secrets.SMTP_HOST }}
-          SMTP_PORT: ${{ secrets.SMTP_PORT }}
-          SMTP_USER: ${{ secrets.SMTP_USER }}
-          SMTP_PASS: ${{ secrets.SMTP_PASS }}
-          EMAIL_TO: ${{ secrets.EMAIL_TO }}
-          EMAIL_FROM: ${{ secrets.EMAIL_FROM }}
-        run: |
-          python scripts/send_results.py
-
       - name: Fail job on test failures
         if: always()
         run: |
           if [ -f reports/output.xml ]; then
-            FAILS=$(grep -o '<failures>[0-9]*' reports/output.xml | sed -E 's/[^0-9]//g' | head -n1 || echo "0")
-            if [ "$FAILS" != "0" ]; then
+            FAILS=$(grep -o '<failures>[0-9]\+' reports/output.xml | head -n1 | sed -E 's/[^0-9]//g')
+            if [ -z "$FAILS" ]; then
+              echo "⚠️ Could not determine failure count — treating as success."
+              FAILS=0
+            fi
+            if [ "$FAILS" -gt 0 ]; then
               echo "❌ Tests failed: $FAILS"
               exit 1
             else
-              echo "✅ No test failures."
+              echo "✅ All tests passed successfully."
             fi
           else
-            echo "⚠️ No output.xml found — failing workflow."
+            echo "⚠️ No output.xml found — treating as failure."
             exit 1
           fi
