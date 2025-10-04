@@ -1,3 +1,4 @@
+---
 name: Robot Framework CI (hourly)
 
 on:
