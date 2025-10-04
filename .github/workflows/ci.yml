@@ -1,7 +1,59 @@
+---
+name: Robot Framework CI (hourly)
+
+on:
+  schedule:
+    - cron: "0 * * * *"  # every hour (UTC)
+  workflow_dispatch:      # ✅ Enables manual “Run workflow” button in Actions UI
+
+jobs:
+  run-tests:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install python-dotenv  # ensures .env compatibility
+
+      - name: Run Robot Framework tests
+        run: |
+          mkdir -p reports
+          ./scripts/run_tests.sh
+        continue-on-error: true  # always continue to upload/email even if tests fail
+
+      - name: Upload test reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: robot-reports
+          path: reports/
+
+      - name: Send results by email
+        env:
+          SMTP_HOST: ${{ secrets.SMTP_HOST }}
+          SMTP_PORT: ${{ secrets.SMTP_PORT }}
+          SMTP_USER: ${{ secrets.SMTP_USER }}
+          SMTP_PASS: ${{ secrets.SMTP_PASS }}
+          EMAIL_TO: ${{ secrets.EMAIL_TO }}
+          EMAIL_FROM: ${{ secrets.EMAIL_FROM }}
+        run: |
+          python scripts/send_results.py
+
+      # ✅ Improved failure detection step
       - name: Fail job on test failures
         if: always()
         run: |
           if [ -f reports/output.xml ]; then
+            echo "🔍 Checking Robot Framework results..."
             FAILS=$(grep -o '<failures>[0-9]\+' reports/output.xml | head -n1 | sed -E 's/[^0-9]//g')
             if [ -z "$FAILS" ]; then
               echo "⚠️ Could not determine failure count — treating as success."
