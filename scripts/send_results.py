@@ -5,6 +5,9 @@ import ssl
 import sys
 from email.message import EmailMessage
 from xml.etree import ElementTree as ET
+from dotenv import load_dotenv
+load_dotenv()
+
 
 print("🚀 Starting send_results.py ...")
 
