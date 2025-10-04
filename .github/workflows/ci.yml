@@ -10,8 +10,8 @@ on:
 jobs:
   run-tests:
     runs-on: ubuntu-latest   # GitHub-hosted Linux runner
-    steps:
 
+    steps:
       # 🧩 Step 1: Checkout your repository
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -26,6 +26,18 @@ jobs:
         with:
           python-version: "3.11"
 
+      # ⚡ Step 3.5: Cache pip dependencies (to speed up installs)
+      - name: Cache pip packages
+        uses: actions/cache@v4
+        with:
+          # Folder where pip stores downloaded packages
+          path: ~/.cache/pip
+          # Unique cache key (OS + hash of requirements.txt)
+          key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
+          # Fallback if exact match not found
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
       # 📦 Step 4: Install dependencies
       - name: Install dependencies
         run: |
@@ -39,7 +51,7 @@ jobs:
           mkdir -p reports
           chmod +x ./scripts/run_tests.sh
           ./scripts/run_tests.sh
-        continue-on-error: true   # Let later steps run even if tests fail
+        continue-on-error: true   # ✅ Let later steps run even if tests fail
 
       # 📁 Step 6: Upload test reports as GitHub artifacts
       - name: Upload test reports
@@ -72,12 +84,12 @@ jobs:
               FAILS=0
             fi
             if [ "$FAILS" -gt 0 ]; then
-              echo "Tests failed: $FAILS"
+              echo "❌ Tests failed: $FAILS"
               exit 1
             else
-              echo "All tests passed successfully."
+              echo "✅ All tests passed successfully."
             fi
           else
-            echo "No output.xml found — treating as failure."
+            echo "⚠️ No output.xml found — treating as failure."
             exit 1
           fi
