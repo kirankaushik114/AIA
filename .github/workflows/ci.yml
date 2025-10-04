@@ -1,45 +1,54 @@
 ---
 name: Robot Framework CI (hourly)
 
+# 👇 Triggers for the workflow
 on:
   schedule:
-    - cron: "0 * * * *"  # every hour (UTC)
-  workflow_dispatch:      # ✅ Enables manual “Run workflow” button in Actions UI
+    - cron: "0 * * * *"  # ⏰ Runs every hour (UTC)
+  workflow_dispatch:      # ✅ Enables manual “Run workflow” button in Actions tab
 
 jobs:
   run-tests:
-    runs-on: ubuntu-latest
-
+    runs-on: ubuntu-latest   # GitHub-hosted Linux runner
     steps:
+
+      # 🧩 Step 1: Checkout your repository
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      # 🧾 Step 2: Debug — show the current directory and list all files
       - name: Show current directory
-          run: pwd && ls -R
+        run: pwd && ls -R
 
+      # 🐍 Step 3: Set up Python environment
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: "3.11"
 
+      # 📦 Step 4: Install dependencies
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-          pip install python-dotenv  # ensures .env compatibility
+          pip install python-dotenv
 
+      # 🤖 Step 5: Run Robot Framework tests
       - name: Run Robot Framework tests
         run: |
           mkdir -p reports
+          chmod +x ./scripts/run_tests.sh
           ./scripts/run_tests.sh
-        continue-on-error: true  # always continue to upload/email even if tests fail
+        continue-on-error: true   # Let later steps run even if tests fail
 
+      # 📁 Step 6: Upload test reports as GitHub artifacts
       - name: Upload test reports
         uses: actions/upload-artifact@v4
         with:
           name: robot-reports
           path: reports/
 
+      # 📧 Step 7: Send results via email
       - name: Send results by email
         env:
           SMTP_HOST: ${{ secrets.SMTP_HOST }}
@@ -51,24 +60,24 @@ jobs:
         run: |
           python scripts/send_results.py
 
-      # ✅ Improved failure detection step
+      # ✅ Step 8: Fail the workflow if there are test failures
       - name: Fail job on test failures
         if: always()
         run: |
           if [ -f reports/output.xml ]; then
-            echo "🔍 Checking Robot Framework results..."
+            echo "Checking Robot Framework results..."
             FAILS=$(grep -o '<failures>[0-9]\+' reports/output.xml | head -n1 | sed -E 's/[^0-9]//g')
             if [ -z "$FAILS" ]; then
-              echo "⚠️ Could not determine failure count — treating as success."
+              echo "Could not determine failure count — treating as success."
               FAILS=0
             fi
             if [ "$FAILS" -gt 0 ]; then
-              echo "❌ Tests failed: $FAILS"
+              echo "Tests failed: $FAILS"
               exit 1
             else
-              echo "✅ All tests passed successfully."
+              echo "All tests passed successfully."
             fi
           else
-            echo "⚠️ No output.xml found — treating as failure."
+            echo "No output.xml found — treating as failure."
             exit 1
           fi
