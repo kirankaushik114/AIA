@@ -7,5 +7,7 @@
     <orderEntry type="jdk" jdkName="Python 3.13 (AIA)" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="module" module-name="ModbusPython" />
+    <orderEntry type="module" module-name="ModbusRobot" />
+    <orderEntry type="module" module-name="PythonLearning" />
   </component>
 </module>

@@ -4,6 +4,8 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/AIA.iml" filepath="$PROJECT_DIR$/.idea/AIA.iml" />
       <module fileurl="file://$PROJECT_DIR$/../ModbusPython/.idea/ModbusPython.iml" filepath="$PROJECT_DIR$/../ModbusPython/.idea/ModbusPython.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../ModbusRobot/.idea/ModbusRobot.iml" filepath="$PROJECT_DIR$/../ModbusRobot/.idea/ModbusRobot.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../PythonLearning/.idea/PythonLearning.iml" filepath="$PROJECT_DIR$/../PythonLearning/.idea/PythonLearning.iml" />
     </modules>
   </component>
 </project>
