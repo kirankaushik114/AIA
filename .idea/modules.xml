@@ -3,7 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/AIA.iml" filepath="$PROJECT_DIR$/.idea/AIA.iml" />
-      <module fileurl="file://$PROJECT_DIR$/../ModbusRobotFrameWork/.idea/ModbusRobotFrameWork.iml" filepath="$PROJECT_DIR$/../ModbusRobotFrameWork/.idea/ModbusRobotFrameWork.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../ModbusPython/.idea/ModbusPython.iml" filepath="$PROJECT_DIR$/../ModbusPython/.idea/ModbusPython.iml" />
     </modules>
   </component>
 </project>
