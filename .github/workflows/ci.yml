@@ -3,9 +3,10 @@ name: Robot Framework CI (hourly)
 
 # 👇 Triggers for the workflow
 on:
-  schedule:
-    - cron: "0 0 * * *"  # ⏰ Runs every hour (UTC)
   workflow_dispatch:      # ✅ Enables manual “Run workflow” button in Actions tab
+  #schedule:
+  #  - cron: "0 0 * * *"  # ⏰ Runs every hour (UTC)
+  #workflow_dispatch:      # ✅ Enables manual “Run workflow” button in Actions tab
 
 jobs:
   run-tests:
